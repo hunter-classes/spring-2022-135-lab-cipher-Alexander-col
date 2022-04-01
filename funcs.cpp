@@ -62,4 +62,112 @@ std::string encryptCaesar(std::string plaintext, int rshift)
     }
     return output;
 }
+// ^^^ above Cesar Cypher and Shift Char function were from original lab 06 ^^^
 
+
+
+char shiftCharUncipher(char c, int rshift) 
+{  
+    int shift = rshift % 26; 
+    shift = 26 - shift;
+
+    if(shift < 0) 
+    { 
+        for(int i = 0; i < 26; i++) 
+        { 
+            if(c == UPPER[i] && i - shift > 25) 
+            {
+                return UPPER[(i - shift) - 26];
+            } 
+            else if(c == LOWER[i] && i - shift > 25) 
+            { 
+                return LOWER[(i - shift) - 26];
+            } 
+            else if(UPPER[i] == c) 
+            { 
+                return UPPER[i - shift]; 
+            } 
+            else if(LOWER[i] == c) 
+            { 
+                return LOWER[i - shift];
+            }
+        }
+    } else 
+    {
+        for(int i = 0; i < 26; i++) 
+        { 
+            if(c == UPPER[i] && i - shift < 0) 
+            {
+                return UPPER[26 - (shift - i)];
+            } 
+            else if(c == LOWER[i] && i - shift < 0) 
+            { 
+                return LOWER[26 - (shift - i)];
+            } 
+            else if(UPPER[i] == c) 
+            { 
+                return UPPER[i - shift]; 
+            } 
+            else if(LOWER[i] == c) 
+            { 
+                return LOWER[i - shift];
+            } 
+        }
+    }
+    return c;
+}
+
+std::string solve(std::string encrypted_string) { 
+    int min;
+    double letter_count = 0;
+    double rotation_total = 0;
+    std::string answer = "";
+    std::string test_string = "";
+    double smallest = INT_MAX;
+
+    std::array<double, 26> letter_freq = 
+    {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+
+
+    for(int i = 0; i < 26; i++) 
+    { 
+        test_string = encryptCaesar(encrypted_string, i);
+        for(int j = 0; j < 26; j++) 
+        { 
+            for(int k = 0; k < encrypted_string.length(); k++) 
+            {
+                if(test_string[k] == UPPER[j] || test_string[k] == LOWER[j]) // or operator is used to catch upper case or lower case characters
+                {
+                    letter_freq[j]++;
+                    letter_count++;
+                }
+            }
+        }
+
+        for(int i = 0; i < 26; i++) 
+        { 
+            letter_freq[i] = letter_freq[i] / letter_count; 
+            letter_freq[i] = std::fabs(letter_freq[i] - ENGLISH_FREQS[i]); 
+            rotation_total += letter_freq[i]; 
+
+            letter_freq[i] = 0;
+        }
+
+        if(rotation_total < smallest) 
+        { 
+            smallest = rotation_total; 
+            min = i; 
+        }
+
+        rotation_total = 0; 
+        letter_count = 0;         
+    }
+    
+    for(int i = 0; i < encrypted_string.length(); i++) 
+    { 
+        answer += shiftCharUncipher(encrypted_string[i], min);
+    }
+
+    return answer; 
+
+}
